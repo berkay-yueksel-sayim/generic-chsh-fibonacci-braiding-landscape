@@ -1,0 +1,136 @@
+{
+  "meta": {
+    "script": "n2_reanchor.py",
+    "purpose": "v1.5 re-anchor: corrected subspace-fidelity N2_P with 1/2 factor",
+    "same_enumeration_as": "landscape_validation.py (gate_set=(2,3,4), psi0=|0>, L=3..9)",
+    "route_max_mismatch": 6.661338147750939e-16,
+    "global_max_N2_P": 1.000000000000001
+  },
+  "positive_controls": {
+    "N2_P(|11>_L) == 1": {
+      "direct": 0.9999999999999998,
+      "projector": 0.9999999999999997,
+      "pass": true
+    },
+    "N2_P((|2>-|4>)/sqrt2) == 0": {
+      "direct": 0.0,
+      "projector": 0.0,
+      "pass": true
+    },
+    "N2_P(|0>) == 1": {
+      "direct": 1.0,
+      "projector": 1.0,
+      "pass": true
+    },
+    "N2_P(|1>) == 1": {
+      "direct": 1.0,
+      "projector": 1.0,
+      "pass": true
+    },
+    "N2_P(|3>) == 1": {
+      "direct": 1.0,
+      "projector": 1.0,
+      "pass": true
+    }
+  },
+  "results_per_length": {
+    "L=3": {
+      "n_sequences": 27,
+      "N2_P_min": 0.7360679774997896,
+      "N2_P_mean": 0.9031558433886419,
+      "N2_P_max": 1.0000000000000004,
+      "argmin_seq": [
+        4,
+        4,
+        2
+      ]
+    },
+    "L=4": {
+      "n_sequences": 81,
+      "N2_P_min": 0.6352549156242117,
+      "N2_P_mean": 0.8844305066929948,
+      "N2_P_max": 1.0000000000000004,
+      "argmin_seq": [
+        4,
+        2,
+        4,
+        2
+      ]
+    },
+    "L=5": {
+      "n_sequences": 243,
+      "N2_P_min": 0.4795955862329629,
+      "N2_P_mean": 0.8880760060022815,
+      "N2_P_max": 1.0000000000000007,
+      "argmin_seq": [
+        4,
+        2,
+        3,
+        3,
+        2
+      ]
+    },
+    "L=6": {
+      "n_sequences": 729,
+      "N2_P_min": 0.28081878806941873,
+      "N2_P_mean": 0.8716164598867504,
+      "N2_P_max": 1.0000000000000007,
+      "argmin_seq": [
+        4,
+        4,
+        2,
+        3,
+        3,
+        2
+      ]
+    },
+    "L=7": {
+      "n_sequences": 2187,
+      "N2_P_min": 0.2808187880694186,
+      "N2_P_mean": 0.8438916113985356,
+      "N2_P_max": 1.0000000000000009,
+      "argmin_seq": [
+        4,
+        4,
+        2,
+        2,
+        3,
+        2,
+        2
+      ]
+    },
+    "L=8": {
+      "n_sequences": 6561,
+      "N2_P_min": 0.18297369350685072,
+      "N2_P_mean": 0.8319203433564445,
+      "N2_P_max": 1.000000000000001,
+      "argmin_seq": [
+        4,
+        4,
+        2,
+        2,
+        3,
+        3,
+        4,
+        2
+      ]
+    },
+    "L=9": {
+      "n_sequences": 19683,
+      "N2_P_min": 0.13079587679442808,
+      "N2_P_mean": 0.829444700502929,
+      "N2_P_max": 1.000000000000001,
+      "argmin_seq": [
+        4,
+        4,
+        2,
+        2,
+        3,
+        3,
+        4,
+        2,
+        3
+      ]
+    }
+  }
+}

@@ -1,0 +1,56 @@
+{
+  "meta": {
+    "script": "d6_acf_prediction_sequential_braiding.py",
+    "N": 1000,
+    "M": 20,
+    "kmax": 50,
+    "base_seed": 20260415,
+    "encoding": "5D 3-gen",
+    "delta": 0.0,
+    "table_reference": "Table tab:acf (Sec. VI, Pillar 3)"
+  },
+  "results": {
+    "A": {
+      "model": "A",
+      "N": 1000,
+      "M": 20,
+      "S_mean": 2.314511273440726,
+      "S_std": 0.21519957426719336,
+      "bell_fraction": 0.9917,
+      "acf1_mean": 0.34329398204893946,
+      "shuffle_std": 0.03164687346431506,
+      "sigma_above_shuffle": 10.847642893887668
+    },
+    "B": {
+      "model": "B",
+      "N": 1000,
+      "M": 20,
+      "S_mean": 2.3110074699824295,
+      "S_std": 0.216532275388628,
+      "bell_fraction": 0.9857,
+      "acf1_mean": 0.3605210215492577,
+      "shuffle_std": 0.03206421397396221,
+      "sigma_above_shuffle": 11.243719301587099
+    },
+    "C": {
+      "model": "C",
+      "N": 1000,
+      "M": 20,
+      "S_mean": 2.0,
+      "S_std": 0.0,
+      "bell_fraction": 0.0,
+      "acf1_mean": 0.0,
+      "shuffle_std": 0.0,
+      "sigma_above_shuffle": 0.0
+    }
+  },
+  "checks": {
+    "model_A_acf1_matches_table": true,
+    "model_A_sigma_matches_table": true,
+    "model_B_acf1_matches_table": true,
+    "model_B_sigma_matches_table": true,
+    "model_C_acf1_matches_table": true,
+    "model_C_sigma_matches_table": true,
+    "ALL_PASS": true
+  }
+}

@@ -1,0 +1,78 @@
+{
+  "meta": {
+    "script": "d8_acf_null_robustness.py",
+    "base_seed": 20260723,
+    "N_null": 10000,
+    "N_steps": 1000,
+    "M_runs": 20,
+    "words": {
+      "config_5d3gen": "324342333324",
+      "config_d1b": "ABABABABABAB"
+    },
+    "note": "Seeded re-anchor of the Sec. VI Pillar-2 null test and the initialization-robustness ACF values; the setup range is taken over the four reproduced setups (vacuum and random initialization, Models A and B)."
+  },
+  "null_test": {
+    "5d3gen_modelA": {
+      "config": "5d3gen_modelA",
+      "N": 10000,
+      "seed": 20260724,
+      "acf1": 0.0013690259233605257,
+      "ci95": 0.0196,
+      "within_ci": true,
+      "S_mean": 2.4023133243261303,
+      "S_std": 0.24928133673284092
+    },
+    "d1b": {
+      "config": "d1b",
+      "N": 10000,
+      "seed": 20260725,
+      "acf1": 0.01016209510005102,
+      "ci95": 0.0196,
+      "within_ci": true,
+      "S_mean": 2.423831713527312,
+      "S_std": 0.25814852288189905
+    }
+  },
+  "robustness": {
+    "A": {
+      "model": "A",
+      "N": 1000,
+      "M": 20,
+      "init": "seeded random normalized 5D state (one draw per run)",
+      "acf1_mean": 0.3181731277988374,
+      "shuffle_std": 0.03119917410050042,
+      "sigma_above_shuffle": 10.198126616234179,
+      "bell_fraction": 1.0
+    },
+    "B": {
+      "model": "B",
+      "N": 1000,
+      "M": 20,
+      "init": "seeded random normalized 5D state (one draw per run)",
+      "acf1_mean": 0.3263616973646835,
+      "shuffle_std": 0.032299446965703194,
+      "sigma_above_shuffle": 10.104250320794256,
+      "bell_fraction": 1.0
+    }
+  },
+  "setup_range": {
+    "setups": {
+      "vacuum_A": 0.34329398204893946,
+      "vacuum_B": 0.3605210215492577,
+      "random_init_A": 0.3181731277988374,
+      "random_init_B": 0.3263616973646835
+    },
+    "printed": [
+      0.31,
+      0.37
+    ]
+  },
+  "checks": {
+    "null_5d3gen_within_ci": true,
+    "null_d1b_within_ci": true,
+    "determinism_recheck_identical": true,
+    "robustness_A_positive": true,
+    "robustness_B_positive": true,
+    "ALL_PASS": true
+  }
+}

@@ -1,0 +1,85 @@
+{
+  "meta": {
+    "script": "d5_topology_switch_validation.py",
+    "n_points": 50,
+    "note": "Closed-form Horodecki reproduction of the already-published sigma3-block and AM/MB-block sweeps; the exhaustive sequence search is not part of this record."
+  },
+  "per_curve": [
+    {
+      "seq": "423",
+      "block": null,
+      "max_abs_diff_S": 0.0,
+      "max_abs_diff_C": 0.0
+    },
+    {
+      "seq": "423",
+      "block": "3",
+      "max_abs_diff_S": 0.0,
+      "max_abs_diff_C": 0.0
+    },
+    {
+      "seq": "423333",
+      "block": null,
+      "max_abs_diff_S": 0.0,
+      "max_abs_diff_C": 0.0
+    },
+    {
+      "seq": "423333",
+      "block": "3",
+      "max_abs_diff_S": 0.0,
+      "max_abs_diff_C": 0.0
+    },
+    {
+      "seq": "23444432",
+      "block": null,
+      "max_abs_diff_S": 0.0,
+      "max_abs_diff_C": 0.0
+    },
+    {
+      "seq": "23444432",
+      "block": "3",
+      "max_abs_diff_S": 0.0,
+      "max_abs_diff_C": 0.0
+    },
+    {
+      "seq": "ABABABABABAB",
+      "block": null,
+      "max_abs_diff_S": 4.440892098500626e-16,
+      "max_abs_diff_C": 0.0
+    },
+    {
+      "seq": "ABABABABABAB",
+      "block": "A",
+      "max_abs_diff_S": 0.0,
+      "max_abs_diff_C": 0.0
+    },
+    {
+      "seq": "ABABABABABAB",
+      "block": "B",
+      "max_abs_diff_S": 0.0,
+      "max_abs_diff_C": 0.0
+    }
+  ],
+  "cross_checks": [
+    {
+      "label": "5D open, seq=23444432",
+      "delta": 3.769911184307752,
+      "S_horodecki": 2.8280476998446917,
+      "S_optimized": 2.8280476998446904,
+      "gap": 1.3322676295501878e-15
+    },
+    {
+      "label": "d1b open, seq=ABABABABABAB",
+      "delta": 4.523893421169302,
+      "S_horodecki": 2.8113831747380456,
+      "S_optimized": 2.8113831747380447,
+      "gap": 8.881784197001252e-16
+    }
+  ],
+  "checks": {
+    "max_abs_diff_S_or_C_over_all_curves": 4.440892098500626e-16,
+    "sigma3_block_gives_exact_C_zero": true,
+    "closed_form_matches_explicit_optimum_max_gap": 1.3322676295501878e-15,
+    "ALL_PASS": true
+  }
+}
