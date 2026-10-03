@@ -12,9 +12,11 @@ Sec. VI that previously had no deposited generator:
     Two configurations are evaluated:
       - "Model A configuration": the five-dimensional three-generator
         encoding used by the sequential-braiding source models
-        (sigma2/sigma3/sigma4), represented by the deposited L = 12
-        winning word 324342333324 (s_delta_sweeps.json / Fig. 2),
-        CHSH via the 5D->4D projection and the Horodecki closed form;
+        (sigma2/sigma3/sigma4), represented by the L = 12 winning word
+        232222343322 -- the delta = 0 maximizer under Protocol A from
+        d10_protocol_a_projection_audit.py (delta0_first_maximizer;
+        s_delta_sweeps.json / Fig. 2) -- CHSH via the Protocol A
+        projection and the Horodecki closed form;
       - "d1b configuration": the two-generator d1b encoding,
         represented by the deposited L = 12 winning word ABABABABABAB
         (Table I headline row), same closed form.
@@ -40,10 +42,12 @@ import io
 from pathlib import Path
 import numpy as np
 
-sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8")
 HERE = Path(__file__).parent
 
 BASE_SEED = 20260723
+# No bare threshold: S > 2 + TOL counts as violating, |S - 2| <= TOL is a boundary
+# class reported separately (same convention as landscape_validation.py).
+TOL = 1e-10
 N_NULL = 10_000
 N_STEPS = 1000
 M_RUNS = 20
@@ -55,7 +59,7 @@ F2 = np.array([[1/PHI, 1/math.sqrt(PHI)],
 R1 = np.exp(-4j * math.pi / 5)
 RT = np.exp(3j * math.pi / 5)
 
-WORD_5D = "324342333324"     # deposited L = 12 winner, encoding B (Fig. 2)
+WORD_5D = "232222343322"     # L = 12 winner, encoding B: delta = 0 maximizer under Protocol A (d10; Fig. 2)
 WORD_D1B = "ABABABABABAB"    # deposited L = 12 winner, encoding A (Table I)
 
 
@@ -154,7 +158,8 @@ def sigma4_5d(delta: float = 0.0) -> np.ndarray:
 
 
 def project_5d_to_2qubit(psi5: np.ndarray) -> np.ndarray:
-    psi4 = np.array([psi5[0], psi5[1], psi5[3], psi5[2] + psi5[4]], dtype=complex)
+    """Protocol A: |11>_L <- (|2>+|4>)/sqrt(2), then renormalize (landscape_validation.project_4d)."""
+    psi4 = np.array([psi5[0], psi5[1], psi5[3], (psi5[2] + psi5[4]) / math.sqrt(2)], dtype=complex)
     n = np.linalg.norm(psi4)
     return psi4 / n if n > 1e-15 else psi4
 
@@ -283,10 +288,12 @@ def robustness(model: str, base_seed: int) -> dict:
                 init="seeded random normalized 5D state (one draw per run)",
                 acf1_mean=acf1_mean, shuffle_std=float(shuffle_std),
                 sigma_above_shuffle=float(sigma_above),
-                bell_fraction=float((S_runs > 2.0).mean()))
+                bell_fraction=float((S_runs > 2.0 + TOL).mean()),
+                at_bound_fraction=float((np.abs(S_runs - 2.0) <= TOL).mean()))
 
 
 def main():
+    sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8")
     print("=" * 72)
     print("  D8 -- ACF null test + initialization robustness")
     print("=" * 72)

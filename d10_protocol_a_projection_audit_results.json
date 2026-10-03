@@ -1,0 +1,242 @@
+{
+  "meta": {
+    "script": "d10_protocol_a_projection_audit.py",
+    "projection_A": "|11>_L <- (|2>+|4>)/sqrt(2), renormalized (landscape_validation.project_4d)",
+    "natural_assignment": "|11>_L <- |4>, |2> discarded, renormalized",
+    "violation_tolerance": 1e-10,
+    "natural_C_zero_tolerance": 1e-10,
+    "word_order": "lexicographic in application order; best = first maximum",
+    "seed": null,
+    "first_maximizer_rule": "two-pass at delta = 0: S* = max over all 3^L words; winner = first word in lexicographic order with S >= S* - 1e-10; n_ties = number of such words",
+    "first_maximizer_lengths": [
+      3,
+      6,
+      8,
+      10,
+      12
+    ]
+  },
+  "per_length": [
+    {
+      "L": 2,
+      "n_words": 9,
+      "n_S_A_above_2": 2,
+      "n_of_these_without_sigma3": 2,
+      "n_of_these_natural_C_zero": 2,
+      "best": {
+        "S_A": 2.0290067777678673,
+        "word": "24",
+        "natural_C": 5.551115123125783e-17,
+        "n_ties": 2
+      },
+      "bell_pct_4D": 22.22222222222222,
+      "at_bound_pct_4D": 77.77777777777779,
+      "S_A_max": 2.0290067777678673
+    },
+    {
+      "L": 3,
+      "n_words": 27,
+      "n_S_A_above_2": 12,
+      "n_of_these_without_sigma3": 6,
+      "n_of_these_natural_C_zero": 10,
+      "best": {
+        "S_A": 2.7215201255624084,
+        "word": "243",
+        "natural_C": 1.0,
+        "n_ties": 2
+      },
+      "bell_pct_4D": 44.44444444444444,
+      "at_bound_pct_4D": 55.55555555555556,
+      "S_A_max": 2.7215201255624084
+    },
+    {
+      "L": 4,
+      "n_words": 81,
+      "n_S_A_above_2": 50,
+      "n_of_these_without_sigma3": 14,
+      "n_of_these_natural_C_zero": 34,
+      "best": {
+        "S_A": 2.721520125562409,
+        "word": "2343",
+        "natural_C": 1.0,
+        "n_ties": 8
+      },
+      "bell_pct_4D": 61.72839506172839,
+      "at_bound_pct_4D": 38.2716049382716,
+      "S_A_max": 2.721520125562409
+    },
+    {
+      "L": 5,
+      "n_words": 243,
+      "n_S_A_above_2": 176,
+      "n_of_these_without_sigma3": 30,
+      "n_of_these_natural_C_zero": 94,
+      "best": {
+        "S_A": 2.7909887118741907,
+        "word": "23432",
+        "natural_C": 0.9999999999999999,
+        "n_ties": 6
+      },
+      "bell_pct_4D": 72.42798353909465,
+      "at_bound_pct_4D": 27.572016460905353,
+      "S_A_max": 2.7909887118741907
+    },
+    {
+      "L": 6,
+      "n_words": 729,
+      "n_S_A_above_2": 576,
+      "n_of_these_without_sigma3": 62,
+      "n_of_these_natural_C_zero": 236,
+      "best": {
+        "S_A": 2.7909887118741903,
+        "word": "232432",
+        "natural_C": 1.0,
+        "n_ties": 16
+      },
+      "bell_pct_4D": 79.01234567901234,
+      "at_bound_pct_4D": 20.98765432098765,
+      "S_A_max": 2.7909887118741907
+    },
+    {
+      "L": 7,
+      "n_words": 2187,
+      "n_S_A_above_2": 1842,
+      "n_of_these_without_sigma3": 126,
+      "n_of_these_natural_C_zero": 606,
+      "best": {
+        "S_A": 2.79098871187419,
+        "word": "2322432",
+        "natural_C": 0.9999999999999998,
+        "n_ties": 32
+      },
+      "bell_pct_4D": 84.2249657064472,
+      "at_bound_pct_4D": 15.775034293552812,
+      "S_A_max": 2.7909887118741907
+    },
+    {
+      "L": 8,
+      "n_words": 6561,
+      "n_S_A_above_2": 5806,
+      "n_of_these_without_sigma3": 254,
+      "n_of_these_natural_C_zero": 1578,
+      "best": {
+        "S_A": 2.8239533036613436,
+        "word": "23343322",
+        "natural_C": 0.8237761078519957,
+        "n_ties": 14
+      },
+      "bell_pct_4D": 88.49260783417162,
+      "at_bound_pct_4D": 11.50739216582838,
+      "S_A_max": 2.8239533036613436
+    },
+    {
+      "L": 9,
+      "n_words": 19683,
+      "n_S_A_above_2": 18064,
+      "n_of_these_without_sigma3": 510,
+      "n_of_these_natural_C_zero": 3996,
+      "best": {
+        "S_A": 2.823953303661344,
+        "word": "223243322",
+        "natural_C": 0.8237761078519956,
+        "n_ties": 48
+      },
+      "bell_pct_4D": 91.77462785144542,
+      "at_bound_pct_4D": 8.22537214855459,
+      "S_A_max": 2.8239533036613444
+    }
+  ],
+  "positive_control": {
+    "all_ok": true,
+    "rows": [
+      {
+        "L": 3,
+        "S4_max_stored": 2.7215201255624084,
+        "S_A_max": 2.7215201255624084,
+        "bell_pct_4D_stored": 44.44444444444444,
+        "bell_pct_4D": 44.44444444444444,
+        "ok": true
+      },
+      {
+        "L": 4,
+        "S4_max_stored": 2.721520125562409,
+        "S_A_max": 2.721520125562409,
+        "bell_pct_4D_stored": 61.72839506172839,
+        "bell_pct_4D": 61.72839506172839,
+        "ok": true
+      },
+      {
+        "L": 5,
+        "S4_max_stored": 2.7909887118741907,
+        "S_A_max": 2.7909887118741907,
+        "bell_pct_4D_stored": 72.42798353909465,
+        "bell_pct_4D": 72.42798353909465,
+        "ok": true
+      },
+      {
+        "L": 6,
+        "S4_max_stored": 2.7909887118741907,
+        "S_A_max": 2.7909887118741907,
+        "bell_pct_4D_stored": 79.01234567901234,
+        "bell_pct_4D": 79.01234567901234,
+        "ok": true
+      },
+      {
+        "L": 7,
+        "S4_max_stored": 2.7909887118741907,
+        "S_A_max": 2.7909887118741907,
+        "bell_pct_4D_stored": 84.22496570644718,
+        "bell_pct_4D": 84.2249657064472,
+        "ok": true
+      },
+      {
+        "L": 8,
+        "S4_max_stored": 2.8239533036613436,
+        "S_A_max": 2.8239533036613436,
+        "bell_pct_4D_stored": 88.49260783417162,
+        "bell_pct_4D": 88.49260783417162,
+        "ok": true
+      },
+      {
+        "L": 9,
+        "S4_max_stored": 2.8239533036613444,
+        "S_A_max": 2.8239533036613444,
+        "bell_pct_4D_stored": 91.77462785144542,
+        "bell_pct_4D": 91.77462785144542,
+        "ok": true
+      }
+    ]
+  },
+  "delta0_first_maximizer": {
+    "3": {
+      "word": "243",
+      "S_A": 2.7215201255624084,
+      "n_ties": 2,
+      "natural_C": 1.0
+    },
+    "6": {
+      "word": "232432",
+      "S_A": 2.7909887118741903,
+      "n_ties": 16,
+      "natural_C": 1.0
+    },
+    "8": {
+      "word": "23343322",
+      "S_A": 2.8239533036613436,
+      "n_ties": 14,
+      "natural_C": 0.8237761078519957
+    },
+    "10": {
+      "word": "2322343322",
+      "S_A": 2.8239533036613436,
+      "n_ties": 114,
+      "natural_C": 0.8237761078519958
+    },
+    "12": {
+      "word": "232222343322",
+      "S_A": 2.8239533036613436,
+      "n_ties": 722,
+      "natural_C": 0.8237761078519956
+    }
+  }
+}

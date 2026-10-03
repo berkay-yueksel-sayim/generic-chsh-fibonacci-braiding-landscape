@@ -7,50 +7,55 @@
     "base_seed": 20260415,
     "encoding": "5D 3-gen",
     "delta": 0.0,
-    "table_reference": "Table tab:acf (Sec. VI, Pillar 3)"
+    "table_reference": "Table tab:acf (Sec. VI, Pillar 3)",
+    "projection": "Protocol A: |11>_L <- (|2>+|4>)/sqrt(2)",
+    "violation_tolerance": 1e-10
   },
   "results": {
     "A": {
       "model": "A",
       "N": 1000,
       "M": 20,
-      "S_mean": 2.314511273440726,
-      "S_std": 0.21519957426719336,
-      "bell_fraction": 0.9917,
-      "acf1_mean": 0.34329398204893946,
-      "shuffle_std": 0.03164687346431506,
-      "sigma_above_shuffle": 10.847642893887668
+      "S_mean": 2.320989813092419,
+      "S_std": 0.21658229061472492,
+      "bell_fraction": 0.9951,
+      "at_bound_fraction": 0.0049,
+      "acf1_mean": 0.3462829096411729,
+      "shuffle_std": 0.03086925627721433,
+      "sigma_above_shuffle": 11.217727648876865
     },
     "B": {
       "model": "B",
       "N": 1000,
       "M": 20,
-      "S_mean": 2.3110074699824295,
-      "S_std": 0.216532275388628,
-      "bell_fraction": 0.9857,
-      "acf1_mean": 0.3605210215492577,
-      "shuffle_std": 0.03206421397396221,
-      "sigma_above_shuffle": 11.243719301587099
+      "S_mean": 2.319195928224883,
+      "S_std": 0.21809811990537323,
+      "bell_fraction": 0.9903,
+      "at_bound_fraction": 0.0097,
+      "acf1_mean": 0.3523545590138306,
+      "shuffle_std": 0.033451377304558515,
+      "sigma_above_shuffle": 10.533334870065701
     },
     "C": {
       "model": "C",
       "N": 1000,
       "M": 20,
-      "S_mean": 2.0,
-      "S_std": 0.0,
-      "bell_fraction": 0.0,
-      "acf1_mean": 0.0,
-      "shuffle_std": 0.0,
-      "sigma_above_shuffle": 0.0
+      "S_mean": 2.0090444686299405,
+      "S_std": 0.008102520137684125,
+      "bell_fraction": 0.8102,
+      "at_bound_fraction": 0.1898,
+      "acf1_mean": 0.034915381816454226,
+      "shuffle_std": 0.030881542719639825,
+      "sigma_above_shuffle": 1.1306229786975308
     }
   },
   "checks": {
-    "model_A_acf1_matches_table": true,
-    "model_A_sigma_matches_table": true,
-    "model_B_acf1_matches_table": true,
-    "model_B_sigma_matches_table": true,
-    "model_C_acf1_matches_table": true,
-    "model_C_sigma_matches_table": true,
-    "ALL_PASS": true
+    "model_A_acf1_matches_v15_table": false,
+    "model_A_sigma_matches_v15_table": false,
+    "model_B_acf1_matches_v15_table": false,
+    "model_B_sigma_matches_v15_table": false,
+    "model_C_acf1_matches_v15_table": false,
+    "model_C_sigma_matches_v15_table": false,
+    "ALL_MATCH_v15_TABLE": false
   }
 }

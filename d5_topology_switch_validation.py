@@ -1,21 +1,26 @@
 #!/usr/bin/env python3
 """
-D5 -- Deterministic validation of topology_switch_results.json
+D5 -- Generator and validation of topology_switch_results.json
 ================================================================
-Independently recomputes |S|(delta), C(delta) for the sigma3-block
-test (three-generator encoding, "topology acts as a gatekeeper for
-entanglement": blocking the cross-bipartition generator sigma3
-collapses concurrence to C=0 exactly) and the AM/MB-block test
-(two-generator d1b encoding), for the fixed test sequences already
-published in the deposited topology_switch_results.json.
+Computes |S|(delta), C(delta) for the sigma3-block test (three-generator
+encoding: blocking the cross-bipartition generator sigma3 makes the
+concurrence vanish exactly in the assignment |11> <- |4>)
+and the AM/MB-block test (two-generator d1b encoding), for the fixed
+representative sequences of the paper (SEQS_5D, SEQ_D1B below; they are
+representative sequences, not winners of any search).
 
-Validation layer, not the discovery search: the three 5D sequences
-and the one d1b sequence below are copied from the deposited JSON
-(public). Given a sequence and a choice of which generator is
-replaced by the identity, recomputing its S(delta)/C(delta) curve is a
-closed-form, deterministic calculation (Horodecki, Horodecki &
-Horodecki 1995), so this script reproduces the JSON's numbers from
-scratch.
+  --regenerate : writes topology_switch_results.json from this script
+                 (every field of every entry is computed here; schema in
+                 with_summary);
+  no flag      : validates the file against a fresh recomputation and
+                 writes d5_topology_switch_validation_results.json.
+
+Open 5D configurations use the Protocol A map (project_protocol_a,
+|11>_L <- (|2>+|4>)/sqrt(2)); blocked ones (sigma3 -> I) the natural
+assignment |11>_L <- |4>, with the Protocol A values reported alongside.
+Given a sequence and a choice of which generator is replaced by the
+identity, the S(delta)/C(delta) curve is a closed-form, deterministic
+calculation (Horodecki, Horodecki & Horodecki 1995).
 
 Reproducible: no randomness in the closed-form path; the independent
 measurement-angle cross-check uses a fixed seed.
@@ -28,7 +33,6 @@ import io
 from pathlib import Path
 import numpy as np
 
-sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8")
 HERE = Path(__file__).parent
 
 PHI = (1 + math.sqrt(5)) / 2
@@ -151,8 +155,20 @@ def apply_5d(seq: str, delta: float, block: str | None) -> np.ndarray:
     return psi
 
 
-def project_5d_to_2qubit(psi5: np.ndarray) -> np.ndarray:
-    psi4 = np.array([psi5[0], psi5[1], psi5[3], psi5[2] + psi5[4]], dtype=complex)
+def project_natural(psi5: np.ndarray) -> np.ndarray:
+    """Natural assignment |11>_L <- |4>: |2> is discarded and the rest renormalized.
+    For words without sigma3 the weight on |2> is exactly zero, so nothing is discarded
+    and the state is the product state the two local generators produce."""
+    psi4 = np.array([psi5[0], psi5[1], psi5[3], psi5[4]], dtype=complex)
+    n = np.linalg.norm(psi4)
+    return psi4 / n if n > 1e-15 else psi4
+
+
+def project_protocol_a(psi5: np.ndarray) -> np.ndarray:
+    """Protocol A: |11>_L <- (|2>+|4>)/sqrt(2), then renormalize (landscape_validation.project_4d).
+    A state without weight on |2> keeps only half of its |4> weight, so this map can
+    report C > 0 for a product state."""
+    psi4 = np.array([psi5[0], psi5[1], psi5[3], (psi5[2] + psi5[4]) / math.sqrt(2)], dtype=complex)
     n = np.linalg.norm(psi4)
     return psi4 / n if n > 1e-15 else psi4
 
@@ -202,17 +218,36 @@ def chsh_optimize_bloch(psi, seed: int = 2026, n_restarts: int = 8):
 
 
 N_POINTS = 50
+TOL = 1e-10          # violation rule S > 2 + TOL (same convention as landscape_validation.py)
+SEQS_5D = ["423", "423333", "23444432"]   # representative 5D sequences of the paper (not winners)
+SEQ_D1B = "ABABABABABAB"                   # Table I headline row (d1b)
 
 
 def sweep_5d(seq: str, block: str | None) -> dict:
+    """Blocked configurations (block == '3') are evaluated in the natural assignment
+    |11>_L <- |4> (|2> carries no weight there); open configurations use the Protocol A
+    map project_protocol_a. For blocked configurations the Protocol A values are
+    returned alongside (C_protocol_A, S_protocol_A)."""
     deltas = np.linspace(0, 2*math.pi, N_POINTS, endpoint=False)
     S = np.zeros(N_POINTS); C = np.zeros(N_POINTS)
+    S_pa = np.zeros(N_POINTS); C_pa = np.zeros(N_POINTS); leak = np.zeros(N_POINTS)
     for i, d in enumerate(deltas):
-        psi4 = project_5d_to_2qubit(apply_5d(seq, d, block))
+        psi5 = apply_5d(seq, d, block)
+        psi4 = project_natural(psi5) if block == '3' else project_protocol_a(psi5)
         C[i] = concurrence(psi4)
         S[i] = chsh_horodecki(C[i])
-    return dict(seq=seq, encoding="5D", block=block, n_points=N_POINTS,
-                delta=deltas.tolist(), S=S.tolist(), C=C.tolist())
+        if block == '3':
+            leak[i] = abs(psi5[2]) ** 2
+            C_pa[i] = concurrence(project_protocol_a(psi5))
+            S_pa[i] = chsh_horodecki(C_pa[i])
+    out = dict(seq=seq, encoding="5D", block=block, n_points=N_POINTS,
+               delta=deltas.tolist(), S=S.tolist(), C=C.tolist())
+    if block == '3':
+        out["assignment"] = "natural: |11>_L <- |4>"
+        out["leakage_max"] = float(leak.max())
+        out["C_protocol_A"] = C_pa.tolist()
+        out["S_protocol_A"] = S_pa.tolist()
+    return out
 
 
 def sweep_d1b(seq: str, block: str | None) -> dict:
@@ -232,11 +267,65 @@ def compare(recomputed: dict, shipped: dict) -> tuple[float, float]:
     return dS, dC
 
 
+def describe(r: dict) -> str:
+    L = len(r["seq"])
+    if r["encoding"] == "5D":
+        tag = "[open]" if r["block"] is None else "[sigma3 -> I (blocked)]"
+    else:
+        tag = {None: "[open]", 'A': "[AM -> I (blocked)]", 'B': "[MB -> I (blocked)]"}[r["block"]]
+    return f"L={L}, sequence {r['seq']} {tag}"
+
+
+def with_summary(r: dict) -> dict:
+    """Entry schema of topology_switch_results.json, written in full by this script:
+    seq, encoding, block, n_points, delta, S, C, S_max, S_mean, C_max,
+    frac_bell (fraction of grid points with S > 2 + TOL), description;
+    blocked 5D entries add assignment, leakage_max, C_protocol_A, S_protocol_A."""
+    S = np.array(r["S"]); C = np.array(r["C"])
+    out = dict(seq=r["seq"], encoding=r["encoding"], block=r["block"], n_points=r["n_points"],
+               delta=r["delta"], S=r["S"], C=r["C"],
+               S_max=float(S.max()), S_mean=float(S.mean()), C_max=float(C.max()),
+               frac_bell=float(np.mean(S > 2.0 + TOL)), description=describe(r))
+    for k in ("assignment", "leakage_max", "C_protocol_A", "S_protocol_A"):
+        if k in r:
+            out[k] = r[k]
+    return out
+
+
+def regenerate(shipped_path: Path) -> None:
+    """Write topology_switch_results.json from this script. Positive control against a
+    previously shipped file, if present: the d1b curves involve no projection and must
+    reproduce the shipped values to < 1e-12; blocked 5D curves give S = 2 exactly."""
+    old = json.loads(shipped_path.read_text(encoding="utf-8")) if shipped_path.exists() else None
+    new = {"three_generator_sigma3_block": [with_summary(sweep_5d(s, b)) for s in SEQS_5D for b in (None, '3')],
+           "two_generator_AM_MB_block": [with_summary(sweep_d1b(SEQ_D1B, b)) for b in (None, 'A', 'B')]}
+    if old is not None:
+        old_a2 = {(r["seq"], r["block"]): r for r in old["two_generator_AM_MB_block"]}
+        d_max = 0.0
+        for r in new["two_generator_AM_MB_block"]:
+            d_max = max(d_max, *compare(r, old_a2[(r["seq"], r["block"])]))
+        print(f"  positive control, d1b curves vs previously shipped file: max|diff| = {d_max:.2e}"
+              f"  (< 1e-12: {d_max < 1e-12})")
+        old_fields = set().union(*(r.keys() for g in old.values() for r in g))
+        new_fields = set().union(*(r.keys() for g in new.values() for r in g))
+        print(f"  fields dropped: {sorted(old_fields - new_fields)}  fields added: {sorted(new_fields - old_fields)}")
+    for r in new["three_generator_sigma3_block"]:
+        if r["block"] == '3':
+            print(f"  blocked {r['seq']:<10} S == 2 exactly at all {r['n_points']} points: "
+                  f"{all(s == 2.0 for s in r['S'])}   C_max = {r['C_max']:.2e}")
+    shipped_path.write_text(json.dumps(new, indent=2))
+    print(f"REGENERATED {shipped_path}")
+
+
 def main():
+    sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8")
     shipped_path = HERE / "topology_switch_results.json"
+    if "--regenerate" in sys.argv:
+        regenerate(shipped_path)
+        return
     shipped = json.loads(shipped_path.read_text(encoding="utf-8"))
-    shipped_a1 = {(r["seq"], r["block"]): r for r in shipped["aufgabe1_3gen_sigma3_block"]}
-    shipped_a2 = {(r["seq"], r["block"]): r for r in shipped["aufgabe2_2gen_AM_MB_block"]}
+    shipped_a1 = {(r["seq"], r["block"]): r for r in shipped["three_generator_sigma3_block"]}
+    shipped_a2 = {(r["seq"], r["block"]): r for r in shipped["two_generator_AM_MB_block"]}
 
     print("=" * 72)
     print("  D5 -- topology_switch_results.json validation")
@@ -246,48 +335,58 @@ def main():
     per_curve = []
     recomputed_a1 = []
     recomputed_a2 = []
+    summary_ok = True
 
-    print("\n[Aufgabe 1 -- 3-gen (5D), sigma3-block]")
-    for seq in ["423", "423333", "23444432"]:
+    def summary_matches(r, ship):
+        s = with_summary(r)
+        return all(s[k] == ship.get(k) for k in ("S_max", "S_mean", "C_max", "frac_bell", "description"))
+
+    print("\n[Three-generator encoding (5D), sigma3 block]")
+    for seq in SEQS_5D:
         for block in [None, '3']:
             r = sweep_5d(seq, block)
             recomputed_a1.append(r)
             ship = shipped_a1[(seq, block)]
             dS, dC = compare(r, ship)
+            summary_ok = summary_ok and summary_matches(r, ship)
             max_diff_overall = max(max_diff_overall, dS, dC)
             per_curve.append(dict(seq=seq, block=block, max_abs_diff_S=dS, max_abs_diff_C=dC))
             tag = "open" if block is None else f"block sigma{block}->I"
             print(f"  seq={seq:<12} {tag:<16} max|dS|={dS:.2e}  max|dC|={dC:.2e}  "
                   f"C_max={max(r['C']):.6f}")
 
-    print("\n[Aufgabe 2 -- 2-gen (d1b), AM/MB-block]")
-    seq_d1b = "ABABABABABAB"
+    print("\n[Two-generator circuit model (d1b), AM/MB block]")
+    seq_d1b = SEQ_D1B
     for block in [None, 'A', 'B']:
         r = sweep_d1b(seq_d1b, block)
         recomputed_a2.append(r)
         ship = shipped_a2[(seq_d1b, block)]
         dS, dC = compare(r, ship)
+        summary_ok = summary_ok and summary_matches(r, ship)
         max_diff_overall = max(max_diff_overall, dS, dC)
         per_curve.append(dict(seq=seq_d1b, block=block, max_abs_diff_S=dS, max_abs_diff_C=dC))
         tag = "open" if block is None else f"block {block}M->I"
         print(f"  seq={seq_d1b}  {tag:<10} max|dS|={dS:.2e}  max|dC|={dC:.2e}  "
               f"C_max={max(r['C']):.6f}")
 
-    # Gatekeeper check: blocking sigma3 (the cross-bipartition generator)
+    # sigma3-block check: blocking sigma3 (the cross-bipartition generator)
     # must collapse concurrence to exactly 0 for every 5D sequence, at
     # every sector phase -- this is the paper's central topological claim.
-    print("\n[Gatekeeper check: sigma3-block -> C=0 exactly, all sequences/phases]")
+    print("\n[sigma3-block check: natural assignment -> C=0 exactly, all sequences/phases;"
+          " Protocol A on the same product states reported alongside]")
     gate_ok = True
     for r in recomputed_a1:
         if r["block"] == '3':
             cmax = max(r["C"])
             ok = cmax < 1e-12
             gate_ok = gate_ok and ok
-            print(f"  seq={r['seq']:<12} max C over 50 phases = {cmax:.3e}  [{'PASS' if ok else 'FAIL'}]")
+            print(f"  seq={r['seq']:<12} max C over 50 phases = {cmax:.3e}  [{'PASS' if ok else 'FAIL'}]"
+                  f"  leakage_max={r['leakage_max']:.1e}  Protocol A: C_max={max(r['C_protocol_A']):.4f}"
+                  f" S_max={max(r['S_protocol_A']):.4f}")
 
     # Independent cross-check: full Bloch-sphere measurement-angle
     # optimization at the argmax of one representative curve per
-    # aufgabe, confirming the closed-form Horodecki value is achieved.
+    # encoding, confirming the closed-form Horodecki value is achieved.
     print("\n[Cross-check: closed-form vs. explicit measurement optimum]")
     cross_checks = []
     for label, r in [("5D open, seq=23444432", next(x for x in recomputed_a1 if x["seq"] == "23444432" and x["block"] is None)),
@@ -295,7 +394,7 @@ def main():
         i_best = int(np.argmax(r["S"]))
         d_best = r["delta"][i_best]
         if r["encoding"] == "5D":
-            psi = project_5d_to_2qubit(apply_5d(r["seq"], d_best, r["block"]))
+            psi = project_protocol_a(apply_5d(r["seq"], d_best, r["block"]))
         else:
             psi = apply_d1b(r["seq"], d_best, r["block"])
         s_opt = chsh_optimize_bloch(psi)
@@ -307,17 +406,30 @@ def main():
     max_gap = max(c["gap"] for c in cross_checks)
     checks = dict(
         max_abs_diff_S_or_C_over_all_curves=max_diff_overall,
+        summary_fields_match_shipped=summary_ok,
         sigma3_block_gives_exact_C_zero=gate_ok,
         closed_form_matches_explicit_optimum_max_gap=max_gap,
     )
-    checks["ALL_PASS"] = bool(max_diff_overall < 1e-6 and gate_ok and max_gap < 1e-6)
+    checks["ALL_PASS"] = bool(max_diff_overall < 1e-12 and summary_ok and gate_ok and max_gap < 1e-6)
 
     out = dict(
         meta=dict(script="d5_topology_switch_validation.py", n_points=N_POINTS,
-                   note="Closed-form Horodecki reproduction of the already-published "
-                        "sigma3-block and AM/MB-block sweeps; the exhaustive sequence "
-                        "search is not part of this record."),
+                   note="Closed-form Horodecki sweeps of the representative sigma3-block and "
+                        "AM/MB-block sequences (not winners of any search); open 5D curves under "
+                        "Protocol A, blocked ones in the natural assignment. topology_switch_results.json "
+                        "is written by this script (--regenerate) and validated here.",
+                   schema=dict(generated_fields=["seq", "encoding", "block", "n_points", "delta", "S", "C",
+                                                 "S_max", "S_mean", "C_max", "frac_bell", "description"],
+                               blocked_5d_extra_fields=["assignment", "leakage_max", "C_protocol_A", "S_protocol_A"],
+                               dropped_fields=["S_opt", "S_horodecki"],
+                               frac_bell="fraction of grid points with S > 2 + 1e-10")),
         per_curve=per_curve,
+        blocked_configurations_under_protocol_A=[
+            dict(seq=r["seq"], block=r["block"], leakage_max=r["leakage_max"],
+                 C_natural_max=float(max(r["C"])),
+                 C_protocol_A_max=float(max(r["C_protocol_A"])), S_protocol_A_max=float(max(r["S_protocol_A"])),
+                 C_protocol_A=r["C_protocol_A"], S_protocol_A=r["S_protocol_A"])
+            for r in recomputed_a1 if r["block"] == '3'],
         cross_checks=cross_checks,
         checks=checks,
     )

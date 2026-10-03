@@ -2,7 +2,8 @@
   "meta": {
     "script": "d4_s_delta_sweep_validation.py",
     "n_points": 50,
-    "note": "Closed-form Horodecki reproduction of already-published winning sequences (all ten Table I rows, Fig. 2, s_delta_sweeps.json) plus a positive control re-evaluating the best_seq_5D winners stored in landscape_validation.json; the exhaustive sequence search that originally found these winners is not part of this record."
+    "note": "Closed-form Horodecki reproduction of the Table I sequences (all ten rows) and of the 5D rows of s_delta_sweeps.json / Fig. 2, whose words are the delta = 0 maximizers under Protocol A from the d10 enumeration (part of this record; checked against d10 before running), plus a positive control re-evaluating the best_seq_5D winners stored in landscape_validation.json.",
+    "gen5d_seqs_source": "d10_protocol_a_projection_audit_results.json: delta0_first_maximizer"
   },
   "per_curve": [
     {
@@ -18,11 +19,11 @@
     {
       "encoding": "d1b",
       "L": 6,
-      "seq": "ABBAAB",
+      "seq": "AAABAB",
       "max_abs_diff_S": 0.0,
       "max_abs_diff_C": 0.0,
-      "recomputed_true_max_S": 2.397999,
-      "recomputed_true_max_C": 0.661514,
+      "recomputed_true_max_S": 2.432863,
+      "recomputed_true_max_C": 0.692607,
       "shipped_argmax_index_matches_recomputed_argmax": true
     },
     {
@@ -58,37 +59,102 @@
     {
       "encoding": "5D",
       "L": 3,
-      "seq": "423",
+      "seq": "243",
       "max_abs_diff_S": 0.0,
-      "max_abs_diff_C": 0.0
+      "max_abs_diff_C": 0.0,
+      "S_delta0": 2.7215201255624084,
+      "sweep_max_S": 2.8038733031965264,
+      "k_max": 28,
+      "k_within_tol": [
+        2,
+        28
+      ],
+      "k_tol": 1e-09,
+      "delta_over_pi_within_tol": [
+        0.08,
+        1.12
+      ],
+      "max_S_below_tsirelson": true
     },
     {
       "encoding": "5D",
       "L": 6,
-      "seq": "424233",
+      "seq": "232432",
       "max_abs_diff_S": 0.0,
-      "max_abs_diff_C": 0.0
+      "max_abs_diff_C": 0.0,
+      "S_delta0": 2.7909887118741907,
+      "sweep_max_S": 2.798461245532337,
+      "k_max": 1,
+      "k_within_tol": [
+        1,
+        29
+      ],
+      "k_tol": 1e-09,
+      "delta_over_pi_within_tol": [
+        0.04,
+        1.16
+      ],
+      "max_S_below_tsirelson": true
     },
     {
       "encoding": "5D",
       "L": 8,
-      "seq": "23444432",
+      "seq": "23343322",
       "max_abs_diff_S": 0.0,
-      "max_abs_diff_C": 0.0
+      "max_abs_diff_C": 0.0,
+      "S_delta0": 2.8239533036613436,
+      "sweep_max_S": 2.8239533036613436,
+      "k_max": 0,
+      "k_within_tol": [
+        0,
+        30
+      ],
+      "k_tol": 1e-09,
+      "delta_over_pi_within_tol": [
+        0.0,
+        1.2
+      ],
+      "max_S_below_tsirelson": true
     },
     {
       "encoding": "5D",
       "L": 10,
-      "seq": "3234442432",
+      "seq": "2322343322",
       "max_abs_diff_S": 0.0,
-      "max_abs_diff_C": 0.0
+      "max_abs_diff_C": 0.0,
+      "S_delta0": 2.8239533036613436,
+      "sweep_max_S": 2.8239533036613436,
+      "k_max": 0,
+      "k_within_tol": [
+        0,
+        30
+      ],
+      "k_tol": 1e-09,
+      "delta_over_pi_within_tol": [
+        0.0,
+        1.2
+      ],
+      "max_S_below_tsirelson": true
     },
     {
       "encoding": "5D",
       "L": 12,
-      "seq": "324342333324",
+      "seq": "232222343322",
       "max_abs_diff_S": 0.0,
-      "max_abs_diff_C": 0.0
+      "max_abs_diff_C": 0.0,
+      "S_delta0": 2.8239533036613436,
+      "sweep_max_S": 2.8239533036613436,
+      "k_max": 0,
+      "k_within_tol": [
+        0,
+        30
+      ],
+      "k_tol": 1e-09,
+      "delta_over_pi_within_tol": [
+        0.0,
+        1.2
+      ],
+      "max_S_below_tsirelson": true
     }
   ],
   "table1_extra_rows": [
@@ -133,14 +199,14 @@
     },
     {
       "L": 9,
-      "seq": "ABBAABABB",
-      "recomputed_S": 2.624322,
-      "recomputed_C": 0.849568,
-      "recomputed_pct_tsirelson": 92.784,
+      "seq": "ABBBBABAB",
+      "recomputed_S": 2.639092,
+      "recomputed_C": 0.860931,
+      "recomputed_pct_tsirelson": 93.306,
       "published": {
-        "S": 2.624,
-        "C": 0.85,
-        "pct_tsirelson": 92.8
+        "S": 2.639,
+        "C": 0.861,
+        "pct_tsirelson": 93.3
       },
       "matches_published": true
     },
@@ -284,6 +350,7 @@
     "closed_form_matches_explicit_optimum_gap": 8.881784197001252e-16,
     "all_table1_extra_rows_match_published": true,
     "all_best_seq_5D_reproduce_stored_S5": true,
+    "all_5D_sweeps_below_tsirelson": true,
     "ALL_PASS": true
   }
 }

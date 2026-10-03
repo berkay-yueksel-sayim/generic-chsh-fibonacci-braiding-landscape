@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-D4 -- Deterministic validation of s_delta_sweeps.json
-======================================================
+D4 -- Deterministic validation of s_delta_sweeps.json  (RUN ORDER: d10 before d4)
+=================================================================================
 Independently recomputes the sector-phase sweeps |S|(delta), C(delta)
 for the winning braid sequences already reported in Table I (d1b,
 two-generator encoding; all ten rows) and used for Fig. 2
@@ -12,17 +12,20 @@ control it re-evaluates every best_seq_5D winner stored in
 landscape_validation.json (L = 3..9) with the native trit-valued
 Protocol-B observables and confirms the stored S5 values.
 
-This is a validation layer, not the discovery search: the winning
-sequences below are copied verbatim from the already-published Table I
-and from s_delta_sweeps.json itself (both public). Finding these
-sequences required an exhaustive enumeration over all 2^L (resp. 3^L)
-braid words per length, which is a separate, much heavier search and is
-not part of this record (see Data and Code Availability). Given a
-sequence, however, recomputing its S(delta) curve is a closed-form,
+Where the sequences come from.  The d1b rows are the published Table I
+sequences (two-generator encoding).  The 5D rows (encoding B) are the
+delta = 0 maximizers under Protocol A for L = 3, 6, 8, 10, 12, taken from
+the exhaustive enumeration over all 3^L words in
+d10_protocol_a_projection_audit.py (key delta0_first_maximizer: first
+word in lexicographic order within 1e-10 of the maximum, two-pass rule).
+That enumeration is part of this record, and this script checks
+GEN5D_SEQS against it before doing anything else.  Run d10 first, then
+d4 --regenerate (rewrites s_delta_sweeps.json), then d4 without a flag
+(validates the file and writes d4_s_delta_sweep_validation_results.json).
+Given a sequence, recomputing its S(delta) curve is a closed-form,
 deterministic calculation (Horodecki, Horodecki & Horodecki 1995: for a
 pure 2-qubit state, |S|_max = 2*sqrt(1+C^2) is exact and reachable), so
-this script reproduces every number in s_delta_sweeps.json from
-scratch without needing that search.
+this script reproduces every number in s_delta_sweeps.json from scratch.
 
 Reproducible: no randomness in the closed-form path. The one
 measurement-angle optimizer used per curve (as an independent
@@ -37,7 +40,6 @@ import io
 from pathlib import Path
 import numpy as np
 
-sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8")
 HERE = Path(__file__).parent
 
 PHI = (1 + math.sqrt(5)) / 2
@@ -147,7 +149,9 @@ def apply_sequence_5d(seq: str, delta: float) -> np.ndarray:
 
 
 def project_5d_to_2qubit(psi5: np.ndarray) -> np.ndarray:
-    psi4 = np.array([psi5[0], psi5[1], psi5[3], psi5[2] + psi5[4]], dtype=complex)
+    """Protocol A: |11>_L <- (|2>+|4>)/sqrt(2), then renormalize -- the same
+    map as project_4d in landscape_validation.py."""
+    psi4 = np.array([psi5[0], psi5[1], psi5[3], (psi5[2] + psi5[4]) / math.sqrt(2)], dtype=complex)
     n = np.linalg.norm(psi4)
     return psi4 / n if n > 1e-15 else psi4
 
@@ -202,11 +206,15 @@ def chsh_optimize_bloch(psi, seed: int = 2026, n_restarts: int = 8):
 
 
 # ----------------------------------------------------------------------
-# Sequences already published in Table I / Fig. 2 and in the deposited
-# s_delta_sweeps.json (public; NOT re-derived by search here).
+# Sequences: d1b rows = the published Table I sequences; 5D rows = the
+# delta = 0 maximizers under Protocol A from the d10 enumeration (checked
+# against d10_protocol_a_projection_audit_results.json in main()).
 # ----------------------------------------------------------------------
-D1B_SEQS = {3: "ABB", 6: "ABBAAB", 8: "BABBABAB", 10: "ABBAABBAAB", 12: "ABABABABABAB"}
-GEN5D_SEQS = {3: "423", 6: "424233", 8: "23444432", 10: "3234442432", 12: "324342333324"}
+D1B_SEQS = {3: "ABB", 6: "AAABAB", 8: "BABBABAB", 10: "ABBAABBAAB", 12: "ABABABABABAB"}
+# delta = 0 maximizers under Protocol A, first in lexicographic order (two-pass rule of d10);
+# the former words 423 / 424233 / 23444432 / 3234442432 / 324342333324 were maximizers only
+# under the projection without the 1/sqrt(2).
+GEN5D_SEQS = {3: "243", 6: "232432", 8: "23343322", 10: "2322343322", 12: "232222343322"}
 N_POINTS = 50
 
 # The remaining five rows of Table I (L = 4, 5, 7, 9, 11), copied verbatim
@@ -218,7 +226,7 @@ TAB1_EXTRA_SEQS = {
     4:  ("ABAB",        2.225, 0.488, 78.7),
     5:  ("AABAB",       2.348, 0.615, 83.0),
     7:  ("ABBAABB",     2.536, 0.780, 89.7),
-    9:  ("ABBAABABB",   2.624, 0.850, 92.8),
+    9:  ("ABBBBABAB",   2.639, 0.861, 93.3),
     11: ("ABABBBBABAB", 2.784, 0.968, 98.4),
 }
 # Provenance note: the pre-v1.5.1 values for L = 4 (2.224/0.486/78.6) and
@@ -228,6 +236,15 @@ TAB1_EXTRA_SEQS = {
 # bit-exactly) their per-sequence optima are 2.225/0.488/78.7 and
 # 2.536/0.780/89.7.  This is the same correction class as the L = 6 row
 # (2.394 -> 2.398), re-anchored in the 2026-07-22 build.
+# 2026-09-30: the L = 6 and L = 9 rows now carry the printed Table I sequences
+# AAABAB (2.433/0.693/86.0) and ABBBBABAB (2.639/0.861/93.3), i.e. the per-length
+# optima of the companion enumeration (delta_opt in fibonacci_enumeration_results.json);
+# the previous entries ABBAAB (2.398) and ABBAABABB (2.624) were not the printed rows.
+# The 5D curves use Protocol A ((|2>+|4>)/sqrt(2)); the earlier deposit omitted the
+# 1/sqrt(2). Run with --regenerate to rewrite s_delta_sweeps.json from this script.
+# 2026-10-02: the 5D rows carry the delta = 0 maximizers under Protocol A (d10,
+# delta0_first_maximizer, two-pass rule); the previous words were maximizers only under
+# the projection without the 1/sqrt(2). The enumeration (d10) is part of this record.
 TSIRELSON = 2.0 * math.sqrt(2.0)
 
 # ----------------------------------------------------------------------
@@ -280,7 +297,26 @@ def sweep_5d(seq: str) -> dict:
 
 
 def main():
+    sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8")
+    # GEN5D_SEQS must be the delta = 0 first maximizers of the d10 enumeration (run d10 first)
+    d10_path = HERE / "d10_protocol_a_projection_audit_results.json"
+    d10_first = json.loads(d10_path.read_text(encoding="utf-8")).get("delta0_first_maximizer")
+    if d10_first is None:
+        sys.exit(f"d4: {d10_path.name} has no 'delta0_first_maximizer' block -- run d10 first")
+    for L, seq in GEN5D_SEQS.items():
+        w = d10_first[str(L)]["word"]
+        if w != seq:
+            sys.exit(f"d4: GEN5D_SEQS[{L}] = {seq} but the d10 first maximizer is {w} -- fix GEN5D_SEQS")
+    print(f"GEN5D_SEQS agree with d10 delta0_first_maximizer for L = {list(GEN5D_SEQS)}")
     shipped_path = HERE / "s_delta_sweeps.json"
+    if "--regenerate" in sys.argv:
+        # Rewrite the shipped sweeps from this script (d1b rows and 5D rows alike);
+        # a subsequent run without the flag validates the file bit for bit.
+        regen = {"encoding_A_d1b_2gen": {str(L): sweep_d1b(s) for L, s in D1B_SEQS.items()},
+                 "encoding_B_5d_3gen": {str(L): sweep_5d(s) for L, s in GEN5D_SEQS.items()}}
+        shipped_path.write_text(json.dumps(regen, indent=2))
+        print(f"REGENERATED {shipped_path}")
+        return
     shipped = json.loads(shipped_path.read_text(encoding="utf-8"))
 
     recomputed = {"encoding_A_d1b_2gen": {}, "encoding_B_5d_3gen": {}}
@@ -311,7 +347,9 @@ def main():
         print(f"  L={L:2d}  seq={seq:>14s}  max|dS|={dS:.2e}  max|dC|={dC:.2e}  "
               f"true_max_S={r['S'][i_true_max]:.6f}  true_max_C={r['C'][i_true_max]:.6f}")
 
-    print("\n[Encoding B -- 5D, three generators sigma2/sigma3/sigma4]")
+    print("\n[Encoding B -- 5D, three generators sigma2/sigma3/sigma4; delta = 0 value, sweep maximum,"
+          " grid index k of the maximum and all k within 1e-9; negative control max S <= 2*sqrt(2)]")
+    K_TOL = 1e-9
     for L, seq in GEN5D_SEQS.items():
         r = sweep_5d(seq)
         recomputed["encoding_B_5d_3gen"][str(L)] = r
@@ -320,8 +358,18 @@ def main():
         dS = float(np.max(np.abs(np.array(r["S"]) - np.array(ship["S"]))))
         dC = float(np.max(np.abs(np.array(r["C"]) - np.array(ship["C"]))))
         max_diff_overall = max(max_diff_overall, dS, dC)
-        per_curve_report.append(dict(encoding="5D", L=L, seq=seq, max_abs_diff_S=dS, max_abs_diff_C=dC))
-        print(f"  L={L:2d}  seq={seq:>14s}  max|dS|={dS:.2e}  max|dC|={dC:.2e}")
+        S_arr = np.array(r["S"])
+        i_max = int(np.argmax(S_arr))
+        k_within = [int(k) for k in np.flatnonzero(S_arr >= S_arr[i_max] - K_TOL)]
+        assert S_arr.max() <= TSIRELSON + 1e-9, f"5D sweep L={L} exceeds the Tsirelson bound: {S_arr.max()!r}"
+        per_curve_report.append(dict(encoding="5D", L=L, seq=seq, max_abs_diff_S=dS, max_abs_diff_C=dC,
+                                     S_delta0=float(S_arr[0]), sweep_max_S=float(S_arr[i_max]), k_max=i_max,
+                                     k_within_tol=k_within, k_tol=K_TOL,
+                                     delta_over_pi_within_tol=[2.0 * k / N_POINTS for k in k_within],
+                                     max_S_below_tsirelson=True))
+        print(f"  L={L:2d}  seq={seq:>14s}  max|dS|={dS:.2e}  max|dC|={dC:.2e}  S(0)={S_arr[0]:.6f}  "
+              f"sweep max={S_arr[i_max]:.6f} at k={i_max} (delta/pi={2.0 * i_max / N_POINTS:.2f})  "
+              f"k within {K_TOL:g}: {k_within}")
 
     # ------------------------------------------------------------------
     # Remaining Table I rows (L = 4, 5, 7, 9, 11): closed-form sweep of
@@ -401,18 +449,20 @@ def main():
         closed_form_matches_explicit_optimum_gap=gap,
         all_table1_extra_rows_match_published=tab1_extra_all_match,
         all_best_seq_5D_reproduce_stored_S5=best_seq_all_match,
+        all_5D_sweeps_below_tsirelson=True,   # asserted in the 5D loop above
     )
     checks["ALL_PASS"] = bool(max_diff_overall < 1e-6 and gap < 1e-6
                               and tab1_extra_all_match and best_seq_all_match)
 
     out = dict(
         meta=dict(script="d4_s_delta_sweep_validation.py", n_points=N_POINTS,
-                   note="Closed-form Horodecki reproduction of already-published winning "
-                        "sequences (all ten Table I rows, Fig. 2, s_delta_sweeps.json) "
-                        "plus a positive control re-evaluating the best_seq_5D winners "
-                        "stored in landscape_validation.json; the exhaustive sequence "
-                        "search that originally found these winners is not part of "
-                        "this record."),
+                   note="Closed-form Horodecki reproduction of the Table I sequences (all ten "
+                        "rows) and of the 5D rows of s_delta_sweeps.json / Fig. 2, whose words "
+                        "are the delta = 0 maximizers under Protocol A from the d10 enumeration "
+                        "(part of this record; checked against d10 before running), plus a "
+                        "positive control re-evaluating the best_seq_5D winners stored in "
+                        "landscape_validation.json.",
+                   gen5d_seqs_source="d10_protocol_a_projection_audit_results.json: delta0_first_maximizer"),
         per_curve=per_curve_report,
         table1_extra_rows=tab1_extra_report,
         best_seq_5D_control=best_seq_report,

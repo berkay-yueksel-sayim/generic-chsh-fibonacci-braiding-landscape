@@ -25,7 +25,6 @@ import io
 from pathlib import Path
 import numpy as np
 
-sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8")
 HERE = Path(__file__).parent
 
 PHI = (1 + math.sqrt(5)) / 2
@@ -77,7 +76,8 @@ def sigma4_5d(delta: float = 0.0) -> np.ndarray:
 
 
 def project_5d_to_2qubit(psi5: np.ndarray) -> np.ndarray:
-    psi4 = np.array([psi5[0], psi5[1], psi5[3], psi5[2] + psi5[4]], dtype=complex)
+    """Protocol A: |11>_L <- (|2>+|4>)/sqrt(2), then renormalize (landscape_validation.project_4d)."""
+    psi4 = np.array([psi5[0], psi5[1], psi5[3], (psi5[2] + psi5[4]) / math.sqrt(2)], dtype=complex)
     n = np.linalg.norm(psi4)
     return psi4 / n if n > 1e-15 else psi4
 
@@ -151,6 +151,11 @@ def shuffle_band(x: np.ndarray, kmax: int, n_perm: int, seed: int):
     return lo, hi, accum.std(axis=0)
 
 
+# No bare threshold: S > 2 + TOL counts as violating, |S - 2| <= TOL is a boundary
+# class reported separately (same convention as landscape_validation.py).
+TOL = 1e-10
+
+
 def run_model(model: str, N: int, M: int, kmax: int, base_seed: int) -> dict:
     S_runs, acf_runs = [], []
     for r in range(M):
@@ -163,15 +168,17 @@ def run_model(model: str, N: int, M: int, kmax: int, base_seed: int) -> dict:
     acf1_mean = acf_mean[1]
     shuffle_std = (hi[1] - lo[1]) / (2 * 1.96)
     sigma_above = abs(acf1_mean) / shuffle_std if shuffle_std > 1e-12 else 0.0
-    bell_fraction = float((S_runs > 2.0).mean())
+    bell_fraction = float((S_runs > 2.0 + TOL).mean())
+    at_bound_fraction = float((np.abs(S_runs - 2.0) <= TOL).mean())
     return dict(model=model, N=N, M=M,
                 S_mean=float(S_runs.mean()), S_std=float(S_runs.std()),
-                bell_fraction=bell_fraction,
+                bell_fraction=bell_fraction, at_bound_fraction=at_bound_fraction,
                 acf1_mean=float(acf1_mean), shuffle_std=float(shuffle_std),
                 sigma_above_shuffle=float(sigma_above))
 
 
 def main():
+    sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8")
     print("=" * 72)
     print("  D6 -- Sequential-braiding ACF prediction (Table tab:acf)")
     print("=" * 72)
@@ -185,24 +192,27 @@ def main():
               f"sigma_above_shuffle={r['sigma_above_shuffle']:.2f}  "
               f"CHSH%={r['bell_fraction']*100:.1f}")
 
-    expected = {"A": (0.343, 10.85), "B": (0.361, 11.24), "C": (0.0, 0.0)}
+    # Values printed in Table tab:acf of v1.5 (computed before the Protocol A repair of
+    # the projection, 2026-09-30); the comparison is informational, not a pass gate.
+    expected_v15_table = {"A": (0.343, 10.85), "B": (0.361, 11.24), "C": (0.0, 0.0)}
     checks = {}
-    for m, (exp_acf, exp_sig) in expected.items():
+    for m, (exp_acf, exp_sig) in expected_v15_table.items():
         r = results[m]
-        checks[f"model_{m}_acf1_matches_table"] = abs(round(r["acf1_mean"], 3) - exp_acf) < 0.001
-        checks[f"model_{m}_sigma_matches_table"] = abs(round(r["sigma_above_shuffle"], 2) - exp_sig) < 0.02
-    checks["ALL_PASS"] = bool(all(checks.values()))
+        checks[f"model_{m}_acf1_matches_v15_table"] = abs(round(r["acf1_mean"], 3) - exp_acf) < 0.001
+        checks[f"model_{m}_sigma_matches_v15_table"] = abs(round(r["sigma_above_shuffle"], 2) - exp_sig) < 0.02
+    checks["ALL_MATCH_v15_TABLE"] = bool(all(checks.values()))
 
     out = dict(meta=dict(script="d6_acf_prediction_sequential_braiding.py", N=N, M=M, kmax=kmax,
                           base_seed=base, encoding="5D 3-gen", delta=0.0,
-                          table_reference="Table tab:acf (Sec. VI, Pillar 3)"),
+                          table_reference="Table tab:acf (Sec. VI, Pillar 3)",
+                          projection="Protocol A: |11>_L <- (|2>+|4>)/sqrt(2)", violation_tolerance=TOL),
                 results=results, checks=checks)
     (HERE / "d6_acf_prediction_results.json").write_text(json.dumps(out, indent=2))
 
     print("\n" + "=" * 72)
     for k, v in checks.items():
         print(f"  [{'PASS' if v else 'FAIL'}] {k}")
-    print(f"\n  ALL_PASS = {checks['ALL_PASS']}")
+    print(f"\n  ALL_MATCH_v15_TABLE = {checks['ALL_MATCH_v15_TABLE']}")
     print(f"  WROTE {HERE / 'd6_acf_prediction_results.json'}")
 
 

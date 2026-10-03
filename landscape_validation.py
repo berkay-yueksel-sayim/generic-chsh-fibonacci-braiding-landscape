@@ -14,8 +14,9 @@ with M_ij Pauli-like observables on the 5D fusion space, and
 |S|_max = 2*sqrt(m1+m2) (Horodecki; m1, m2 the two largest eigenvalues
 of T^T.T).
 
-Method, Check 2: N^2 = |psi0|^2 + |psi1|^2 + |psi3|^2 + |psi2+psi4|^2;
-the total 5D norm is 1.
+Method, Check 2: N^2 = |psi0|^2 + |psi1|^2 + |psi3|^2 + |psi2+psi4|^2 / 2,
+the weight inside the logical subspace spanned by |0>, |1>, |3> and the
+normalized |11>_L = (|2>+|4>)/sqrt(2); the total 5D norm is 1, so N^2 <= 1.
 
 Output:
 - landscape_validation.json (tables)
@@ -31,7 +32,6 @@ import time
 from pathlib import Path
 import numpy as np
 
-sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8")
 
 OUT = Path(__file__).parent
 phi = (1 + np.sqrt(5)) / 2
@@ -229,11 +229,13 @@ def chsh_5d(psi: np.ndarray) -> float:
 # ------------------------------------------------------------------
 
 def leakage_N2(psi: np.ndarray) -> float:
-    """N^2 = |psi0|^2 + |psi1|^2 + |psi3|^2 + |psi2+psi4|^2."""
+    """N^2 = |psi0|^2 + |psi1|^2 + |psi3|^2 + |psi2+psi4|^2 / 2 -- the weight in
+    the logical subspace; the factor 1/2 is the projection onto the NORMALIZED
+    |11>_L = (|2>+|4>)/sqrt(2) (same quantity as N^2_P in n2_reanchor.py)."""
     a0 = abs(psi[0])**2
     a1 = abs(psi[1])**2
     a3 = abs(psi[3])**2
-    a24 = abs(psi[2] + psi[4])**2
+    a24 = abs(psi[2] + psi[4])**2 / 2.0
     return float(a0 + a1 + a3 + a24)
 
 # ------------------------------------------------------------------
@@ -275,6 +277,13 @@ def apply_sequence(gates: list[int], psi0: np.ndarray) -> np.ndarray:
         psi = SIGMA[g] @ psi
     return psi
 
+# TOLERANCE. No bare threshold comparisons: a sequence counts as violating
+# when S > 2 + TOL with TOL = 1e-10. Sequences with |S - 2| <= TOL are
+# counted separately as boundary cases and are never silently assigned to
+# either side. Same convention as the companion record
+# (data/fibonacci_enumeration.py).
+TOL = 1e-10
+
 def enumerate_length(L: int, gate_set: tuple[int, ...] = (2, 3, 4),
                      psi0: np.ndarray | None = None) -> dict:
     """Enumerate all |gate_set|^L sequences at length L."""
@@ -306,10 +315,18 @@ def enumerate_length(L: int, gate_set: tuple[int, ...] = (2, 3, 4),
         "n_sequences": n_total,
         "S5_max": float(S5.max()),
         "S5_mean": float(S5.mean()),
-        "bell_pct_5D": float((S5 > 2.0).mean() * 100),
+        "bell_pct_5D": float((S5 > 2.0 + TOL).mean() * 100),
+        "at_bound_pct_5D": float((abs(S5 - 2.0) <= TOL).mean() * 100),
+        "below_pct_5D": float((S5 < 2.0 - TOL).mean() * 100),
         "S4_max": float(S4.max()),
         "S4_mean": float(S4.mean()),
         "bell_pct_4D": float((S4 > 2.0).mean() * 100),
+        "violation_tolerance": TOL,
+        "violation_rule": "S > 2 + tol counts as violating; |S - 2| <= tol "
+                          "is counted separately as a boundary case, never "
+                          "silently assigned to either side; the 4D column "
+                          "uses the bare threshold because no boundary class "
+                          "exists there (smallest gap 7.5e-04)",
         "N2_mean": float(N2.mean()),
         "N2_min": float(N2.min()),
         "N2_max": float(N2.max()),
@@ -322,12 +339,13 @@ def enumerate_length(L: int, gate_set: tuple[int, ...] = (2, 3, 4),
 # ------------------------------------------------------------------
 
 def main():
+    sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8")
     print("=" * 66)
     print("  FIBONACCI LANDSCAPE VALIDATION — Checks 1 + 2")
     print("=" * 66)
 
     # Sanity
-    print("\n[Sanity] Unitaritaet:")
+    print("\n[Sanity] Unitarity:")
     for i in [1, 2, 3, 4, 5]:
         print(f"  sigma{i}: unitary = {is_unitary(SIGMA[i])}")
     print("\n[Sanity] Yang-Baxter (max residual):")
@@ -351,7 +369,8 @@ def main():
         t0 = time.time()
         r = enumerate_length(L)
         dt = time.time() - t0
-        r["walltime_s"] = round(dt, 2)
+        # walltime_s is deliberately NOT stored: it would make the JSON
+        # nonreproducible byte-for-byte across runs.
         results[f"L={L}"] = r
         print(f"\nL={L}: {r['n_sequences']} sequences in {dt:.1f}s")
         print(f"  |S|_max_5D = {r['S5_max']:.4f}  Bell%_5D = {r['bell_pct_5D']:.2f}%")

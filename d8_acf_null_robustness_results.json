@@ -6,7 +6,7 @@
     "N_steps": 1000,
     "M_runs": 20,
     "words": {
-      "config_5d3gen": "324342333324",
+      "config_5d3gen": "232222343322",
       "config_d1b": "ABABABABABAB"
     },
     "note": "Seeded re-anchor of the Sec. VI Pillar-2 null test and the initialization-robustness ACF values; the setup range is taken over the four reproduced setups (vacuum and random initialization, Models A and B)."
@@ -16,11 +16,11 @@
       "config": "5d3gen_modelA",
       "N": 10000,
       "seed": 20260724,
-      "acf1": 0.0013690259233605257,
+      "acf1": 0.002249370002927981,
       "ci95": 0.0196,
       "within_ci": true,
-      "S_mean": 2.4023133243261303,
-      "S_std": 0.24928133673284092
+      "S_mean": 2.316691711678015,
+      "S_std": 0.27597654033618685
     },
     "d1b": {
       "config": "d1b",
@@ -39,32 +39,34 @@
       "N": 1000,
       "M": 20,
       "init": "seeded random normalized 5D state (one draw per run)",
-      "acf1_mean": 0.3181731277988374,
-      "shuffle_std": 0.03119917410050042,
-      "sigma_above_shuffle": 10.198126616234179,
-      "bell_fraction": 1.0
+      "acf1_mean": 0.31410550513869506,
+      "shuffle_std": 0.030925154244480474,
+      "sigma_above_shuffle": 10.156958398833424,
+      "bell_fraction": 1.0,
+      "at_bound_fraction": 0.0
     },
     "B": {
       "model": "B",
       "N": 1000,
       "M": 20,
       "init": "seeded random normalized 5D state (one draw per run)",
-      "acf1_mean": 0.3263616973646835,
-      "shuffle_std": 0.032299446965703194,
-      "sigma_above_shuffle": 10.104250320794256,
-      "bell_fraction": 1.0
+      "acf1_mean": 0.33646880357799375,
+      "shuffle_std": 0.03316929940097246,
+      "sigma_above_shuffle": 10.143982829137752,
+      "bell_fraction": 1.0,
+      "at_bound_fraction": 0.0
     }
   },
   "setup_range": {
     "setups": {
-      "vacuum_A": 0.34329398204893946,
-      "vacuum_B": 0.3605210215492577,
-      "random_init_A": 0.3181731277988374,
-      "random_init_B": 0.3263616973646835
+      "vacuum_A": 0.3462829096411729,
+      "vacuum_B": 0.3523545590138306,
+      "random_init_A": 0.31410550513869506,
+      "random_init_B": 0.33646880357799375
     },
     "printed": [
       0.31,
-      0.37
+      0.36
     ]
   },
   "checks": {
