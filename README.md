@@ -3,6 +3,8 @@
 **Author:** Berkay Yüksel Sayim
 **ORCID:** [0009-0004-4993-7352](https://orcid.org/0009-0004-4993-7352)
 
+> **Important — licensing:** paper, figures and data under CC BY 4.0; source code under the Apache License, Version 2.0. Earlier versions (before 1.6) have been withdrawn. Please read [IMPORTANT.md](IMPORTANT.md).
+
 ## Abstract
 
 We report a complete sequence-by-sequence landscape of CHSH-form values for
@@ -110,4 +112,5 @@ are not part of this record.
 ## License
 
 - Paper, figures, and data: [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/) — see `LICENSE`
-- Source code (`*.py`): [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0) — see `LICENSE-CODE`
+- Source code (`*.py`): [Apache License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0) — see `LICENSE-CODE`, `NOTICE` and `IMPORTANT.md`
+- All versions before 1.6 were released under earlier licence terms and have been withdrawn; version 1.6 and later use the licences above.
